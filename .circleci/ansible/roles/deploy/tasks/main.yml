@@ -15,6 +15,11 @@
   unarchive:
     src: artifact.tar.gz
     dest: .
+  
+- name: "Installing latest nodejs"
+  shell: |
+    curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+    apt-get install nodejs
     
 - name: "Installing pm2"
   become: yes
@@ -30,4 +35,6 @@
     npm install -g webpack-dev-server
     npm install
     npm run build
+    npm run webpack
+    npm run start:prod
     pm2 start dist/main.js --name backend
