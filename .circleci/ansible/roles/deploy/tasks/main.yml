@@ -19,7 +19,7 @@
 - name: "Installing latest nodejs"
   shell: |
     curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-    apt-get install nodejs
+    sudo apt-get install -y nodejs
     
 - name: "Installing pm2"
   become: yes
