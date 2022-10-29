@@ -1,0 +1,33 @@
+---
+
+- name: update packages
+  become: yes
+  apt:
+    upgrade: yes
+    update_cache: yes
+   
+- name: Creates directory
+  file:
+    path: ~/backendtmp
+    state: directory
+   
+- name: "Unarchive backend files"
+  unarchive:
+    src: artifact.tar.gz
+    dest: .
+    
+- name: "Installing pm2"
+  become: yes
+  npm: 
+    name: pm2
+    global: yes    
+
+- name: "Start Node app with PM2"
+  become: yes
+  shell: |
+    cd ~/dist
+    npm install -g npm@latest
+    npm install -g webpack-dev-server
+    npm install
+    npm run build
+    pm2 start npm
