@@ -250,7 +250,7 @@ jobs:
           name: Ensure inventory saved
           command: |
             cat .circleci/ansible/inventory.txt
-                        
+
       - persist_to_workspace:
           root: .circleci
           paths:
@@ -297,7 +297,7 @@ jobs:
             # Your code here
             cd .circleci/ansible
             cat inventory.txt
-            ansible-playbook -i inventory.txt configure-server.yml --private-key udacity.pem -vvv
+            ansible-playbook -i .circleci/ansible/inventory.txt configure-server.yml --private-key udacity.pem -vvv
       # Here's where you will add some code to rollback on failure 
   run-migrations:
     docker:
@@ -407,7 +407,7 @@ jobs:
             cat ~/ansible/inventory.txt
             tar -cvf backend.tar backend
             cp backend.tar ~/backend.tar
-            ansible-playbook -i inventory.txt deploy-backend.yml -vvv
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml -vvv
       - destroy-environment
       - revert-migrations
       # Here's where you will add some code to rollback on failure  
