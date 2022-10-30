@@ -393,34 +393,29 @@ jobs:
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml    
             # Here's where you will add some code to rollback on failure  
   smoke-test:
-    docker: 
-      - image: alpine:latest
+    docker:
+      - image: python:3.7-alpine3.11
     steps:
-      # Checkout code from git
       - checkout
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
-            apk add --no-cache aws-cli
-            apk add --update nodejs npm
-            apk add --no-cache curl
-      - run:
-          name: Get backend url
-          command: |
-            # Fetch and prepare the BACKEND_IP env var
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:Name,Values=backend-*" --output text)
-            echo $BACKEND_IP
+            apk add --update curl nodejs npm busybox-extras
+            pip install awscli
       - run:
           name: Backend smoke test.
           command: |
-            # your code 
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:Name,Values=backend-*" --output text)
+            BACKEND_IP=$(aws cloudformation \
+              list-exports --query "Exports[?Name==\`backendIP\`].Value" \
+              --no-paginate --output text)
             echo $BACKEND_IP
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}" 
-            if curl "${API_URL}/api/status" | grep "ok"
+            echo "http://$BACKEND_IP:3030/api/status"
+            busybox-extras telnet $BACKEND_IP 3030
+            if curl "${BACKEND_IP}:3030/api/status" | grep "ok"
             then
-                return 0 
+                return 0
             else
                 return 1
             fi
