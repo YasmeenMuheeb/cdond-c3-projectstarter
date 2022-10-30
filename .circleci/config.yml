@@ -252,7 +252,7 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
-      # Add ssh keys with fingerprint 
+      # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints: ["52:c0:05:1a:69:8f:6c:0a:04:cc:ed:73:ed:4b:1d:93"]
       # attach workspace
@@ -353,7 +353,7 @@ jobs:
   deploy-backend:
     docker:
       # Docker image here that supports Ansible
-      - image: python:3.7-alpine3.11
+      - image: alpine:latest
     steps:
       # Checkout code from git
       - checkout
@@ -366,39 +366,52 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update curl nodejs npm ansible zip
-            pip install awscli
+            apk add --no-cache aws-cli
+            apk add --update ansible
+            apk add --update nodejs npm
+            apk add --no-cache curl
       - run:
-          name: Build backend app
+          name: Deploy backend
           command: |
-            cd ~/project/backend
-            npm i
+            # your code here
+            cd backend 
+            touch .env
+            echo TYPEORM_CONNECTION=postgres >> ".env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> ".env"
+            echo TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js} >> ".env"
+            echo TYPEORM_MIGRATIONS=./migrations/*.ts >> ".env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> ".env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> ".env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ".env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ".env"
+            echo TYPEORM_DATABASE= $TYPEORM_DATABASE >> ".env"
+            npm install
+            npm --version
             npm run build
-            cd dist
-            cp ../package.json .
-            zip -rq dist.zip *
-            mkdir -p ~/project/.circleci/ansible/roles/deploy_backend/files/
-            mv dist.zip ~/project/.circleci/ansible/roles/deploy_backend/files/
-      - run:
-          name: Setup EC2 instance & copy compiled backend to the EC2 instance
-          command: |
-            ls ~/project/.circleci/ansible/roles/deploy_backend/files/
-            cd ~/project/backend
-            ansible-galaxy install weareinteractive.environment
+            cd ..
+            # Zip the directory 
+            tar -C backend -czvf artifact.tar.gz . 
+            cp artifact.tar.gz .circleci/ansible/artifact.tar.gz
+            cd .circleci/ansible
+            ls -il
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml -vvv
       - destroy-environment
       - revert-migrations
       # Here's where you will add some code to rollback on failure  
   smoke-test:
     docker: 
-      - image: python:3.7-alpine3.11
+      - image: alpine:latest
     steps:
-      - attach_workspace:
-          at: ~/
+      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
-            apk add --update curl
-            pip install awscli
+            apk add --no-cache aws-cli
+            apk add --update nodejs npm
+            apk add --no-cache curl
       - run:
           name: Get backend url
           command: |
@@ -465,5 +478,3 @@ workflows:
 #            - deploy-frontend
             - deploy-backend
       
-
-
