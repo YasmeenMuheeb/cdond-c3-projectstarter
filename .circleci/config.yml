@@ -237,7 +237,20 @@ jobs:
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:Name,Values=backend-*" \
             --output text >> .circleci/ansible/inventory.txt
-            
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            # Save the ip
+            backendip=$(aws cloudformation \
+              list-exports --query "Exports[?Name==\`backendIP\`].Value" \
+              --no-paginate --output text)
+            echo "$backendip"
+            echo "$backendip" >> .circleci/ansible/inventory.txt
+      - run:
+          name: Ensure inventory saved
+          command: |
+            cat .circleci/ansible/inventory.txt
+                        
       - persist_to_workspace:
           root: .circleci
           paths:
