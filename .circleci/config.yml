@@ -387,10 +387,10 @@ jobs:
             npm run prestart:prod
             cd ..
             echo "Contents  of the inventory.txt file is -------"
-            cat ~/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
             tar -cvf backend.tar backend
             cp backend.tar ~/backend.tar
-            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ~/ansible/inventory.txt .circleci/ansible/deploy-backend.yml    
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml    
             # Here's where you will add some code to rollback on failure  
   smoke-test:
     docker: 
