@@ -355,54 +355,43 @@ jobs:
       # Here's where you will add some code to rollback on failure      
   deploy-backend:
     docker:
-      # Docker image here that supports Ansible
-      - image: alpine:latest
+      - image: python:3.7-alpine3.11
     steps:
-      # Checkout code from git
       - checkout
-      # Add ssh keys with fingerprint
       - add_ssh_keys:
-          fingerprints: ["52:c0:05:1a:69:8f:6c:0a:04:cc:ed:73:ed:4b:1d:93"]
-      # attach workspace
+          fingerprints: ["c2:67:e2:1f:cb:da:c8:c7:74:3d:07:22:ce:57:cf:46"]
       - attach_workspace:
           at: ~/
       - run:
           name: Install dependencies
           command: |
-            apk add --no-cache aws-cli
-            apk add --update ansible
-            apk add --update nodejs npm
-            apk add --no-cache curl
+            apk add --update ansible tar gzip ansible nodejs npm curl
+            pip install awscli
       - run:
           name: Deploy backend
           command: |
-            # your code here
-            cd backend 
-            touch .env
+            cd backend
+            npm i
+            echo ENVIRONMENT=production > ".env"
             echo TYPEORM_CONNECTION=postgres >> ".env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> ".env"
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> ".env"
             echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> ".env"
-            echo TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js} >> ".env"
-            echo TYPEORM_MIGRATIONS=./migrations/*.ts >> ".env"
+            echo NODE_ENV=production >> ".env"
             echo TYPEORM_HOST=$TYPEORM_HOST >> ".env"
             echo TYPEORM_PORT=$TYPEORM_PORT >> ".env"
             echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ".env"
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ".env"
-            echo TYPEORM_DATABASE= $TYPEORM_DATABASE >> ".env"
-            npm install
-            npm --version
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ".env"
             npm run build
+            npm run prestart:prod
             cd ..
-            # Zip the directory 
-            tar -C backend -czvf artifact.tar.gz . 
-            cp artifact.tar.gz .circleci/ansible/artifact.tar.gz
-            cd .circleci/ansible
-            ls -il
             echo "Contents  of the inventory.txt file is -------"
-            cat inventory.txt
-            ansible-playbook -i inventory.txt deploy-backend.yml -vvv
-      - destroy-environment
-      - revert-migrations
-      # Here's where you will add some code to rollback on failure  
+            cat ~/ansible/inventory.txt
+            tar -cvf backend.tar backend
+            cp backend.tar ~/backend.tar
+            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ~/ansible/inventory.txt .circleci/ansible/deploy-backend.yml    
+            # Here's where you will add some code to rollback on failure  
   smoke-test:
     docker: 
       - image: alpine:latest
