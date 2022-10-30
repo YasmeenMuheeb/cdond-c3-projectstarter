@@ -407,9 +407,10 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            BACKEND_IP=$(aws cloudformation \
-              list-exports --query "Exports[?Name==\`backendIP\`].Value" \
-              --no-paginate --output text)
+            BACKEND_IP=$(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters "Name=tag:Name,Values=backend-*" \
+            --output text)
             echo $BACKEND_IP
             echo "http://$BACKEND_IP:3030/api/status"
             busybox-extras telnet $BACKEND_IP 3030
