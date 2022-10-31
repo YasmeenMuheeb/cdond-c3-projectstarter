@@ -30,8 +30,6 @@ async function bootstrap() {
     .setBasePath(apiVersionPrefix)
 
     .addBearerAuth() // here is an intentional compile error. Remove the "x " and the backend should compile.
-=======
-    .addBearerAuth() // here is an intentional compile error. Remove the "x " and the backen d should compile.
 
     .build();
   const document = SwaggerModule.createDocument(app, options);
