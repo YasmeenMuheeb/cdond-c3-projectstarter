@@ -415,7 +415,7 @@ jobs:
             --output text)
             echo $BACKEND_IP
             echo "http://$BACKEND_IP:3030/api/status"
-            busybox-extras telnet $BACKEND_IP 3030
+            #busybox-extras telnet $BACKEND_IP 3030
             if curl "${BACKEND_IP}:3030/api/status" | grep "ok"
             then
                 return 0
