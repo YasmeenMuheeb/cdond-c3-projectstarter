@@ -469,7 +469,7 @@ jobs:
     steps:
       # Checkout code from git
       - run:
-          name: Get old stack workflow id
+          name: Get old stack workflow id 
           command: |
             # Fetch the Old workflow ID
             export OldWorkflowID=$(aws cloudformation \ 
