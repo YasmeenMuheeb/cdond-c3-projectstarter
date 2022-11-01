@@ -470,7 +470,7 @@ jobs:
       # Checkout code from git
       - run:
           name: Get old stack workflow id 
-          command: |
+          command: | 
             # Fetch the Old workflow ID
             export OldWorkflowID=$(aws cloudformation \ 
                     list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \ 
