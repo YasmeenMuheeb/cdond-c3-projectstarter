@@ -509,7 +509,10 @@ workflows:
       - scan-backend:
           requires:
             - build-backend
-      - deploy-infrastructure
+      - deploy-infrastructure:
+          filters:
+            branches:
+              only: [master]
       - configure-infrastructure: 
           requires: 
             - deploy-infrastructure
