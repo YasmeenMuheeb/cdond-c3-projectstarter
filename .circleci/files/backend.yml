@@ -37,10 +37,10 @@ Resources:
       ImageId: ami-068663a3c619dd892 
       Tags:
         - Key: Name
-          Value: !Sub backend-1-${ID}
+          Value: !Sub backend-${ID}
 Outputs:
   backendIP:
     Description: The IP of the EC2Instance
     Value: !GetAtt EC2Instance.PublicIp
     Export:
-      Name: "backendIP-1"
+      Name: "backendIP"
