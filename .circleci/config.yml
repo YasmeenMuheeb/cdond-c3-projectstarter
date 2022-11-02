@@ -236,12 +236,12 @@ jobs:
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:Name,Values=backend*" \
-            --output text >> .circleci/ansible/inventory.txt
+            --output text >> .circleci/ansible/inventory1.txt
             
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/.circleci/ansible/inventory.txt
+            - project/.circleci/ansible/inventory1.txt
       # Here's where you will add some code to rollback on failure 
       - destroy-environment   
 
@@ -284,7 +284,7 @@ jobs:
             # Your code here
             cd .circleci/ansible
             cat inventory1.txt
-            ansible-playbook -i inventory.txt configure-server.yml --private-key udacity.pem -vvv
+            ansible-playbook -i inventory1.txt configure-server.yml --private-key udacity.pem -vvv
       # Here's where you will add some code to rollback on failure 
   run-migrations:
     docker:
@@ -387,10 +387,10 @@ jobs:
             npm run prestart:prod
             cd ..
             echo "Contents  of the inventory.txt file is -------"
-            cat .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory1.txt
             tar -cvf backend.tar backend
             cp backend.tar ~/backend.tar
-            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml    
+            ansible-playbook -i .circleci/ansible/inventory1.txt .circleci/ansible/deploy-backend.yml    
             # Here's where you will add some code to rollback on failure  
       - destroy-environment
       - revert-migrations
@@ -463,10 +463,11 @@ jobs:
           name: Update cloudfront distribution
           command: |
             # promote
-            aws cloudformation update-stack \
-              --use-previous-template \
+            aws cloudformation deploy \
+              --template-file .circleci/files/cloudfront.yml \
               --stack-name InitialStack \
-              --parameters ParameterKey=WorkflowID,ParameterValue=${CIRCLE_WORKFLOW_ID:0:7},UsePreviousValue=false       
+              --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --tags project=udapeople     
       # Here's where you will add some code to rollback on failure
       - destroy-environment        
       - revert-migrations  
