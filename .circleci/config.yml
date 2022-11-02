@@ -231,17 +231,17 @@ jobs:
                --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} \
                --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" 
       - run:
-          name: Add back-end ip to ansible inventory1
+          name: Add back-end ip to ansible inventory
           command: |
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:Name,Values=backend-1*" \
-            --output text >> .circleci/ansible/inventory1.txt
+            --output text >> .circleci/ansible/inventory.txt
             
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/.circleci/ansible/inventory1.txt
+            - project/.circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure 
       - destroy-environment   
 
@@ -284,7 +284,7 @@ jobs:
             # Your code here
             cd .circleci/ansible
             cat inventory1.txt
-            ansible-playbook -i inventory1.txt configure-server.yml --private-key udacity.pem -vvv
+            ansible-playbook -i inventory.txt configure-server.yml --private-key udacity.pem -vvv
       # Here's where you will add some code to rollback on failure 
   run-migrations:
     docker:
@@ -386,11 +386,11 @@ jobs:
             npm run build
             npm run prestart:prod
             cd ..
-            echo "Contents  of the inventory1.txt file is -------"
-            cat .circleci/ansible/inventory1.txt
+            echo "Contents  of the inventory.txt file is -------"
+            cat .circleci/ansible/inventory.txt
             tar -cvf backend.tar backend
             cp backend.tar ~/backend.tar
-            ansible-playbook -i .circleci/ansible/inventory1.txt .circleci/ansible/deploy-backend.yml    
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml    
             # Here's where you will add some code to rollback on failure  
       - destroy-environment
       - revert-migrations
