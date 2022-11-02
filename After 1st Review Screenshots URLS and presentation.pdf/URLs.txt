@@ -1,0 +1,9 @@
+URL01 => https://github.com/YasmeenMuheeb/cdond-c3-projectstarter
+
+URL02 => http://udapeople-91ffef7.s3-website-us-east-1.amazonaws.com/#/employees
+
+URL03 => https://d14mfhg3bwicm5.cloudfront.net/#/employees
+
+URL04 => http://34.207.70.233:3030/api/status
+
+URL05 => http://3.95.208.172:9090/targets
