@@ -37,7 +37,7 @@ Resources:
       ImageId: ami-068663a3c619dd892 
       Tags:
         - Key: Name
-          Value: !Sub backend-${ID}
+          Value: !Sub backend-1-${ID}
 Outputs:
   backendIP:
     Description: The IP of the EC2Instance
